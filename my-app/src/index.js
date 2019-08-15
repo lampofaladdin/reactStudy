@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+//返回 button按钮，本组件的点击事件触发父组件的点击事件
 function Square(props) {
     return (
         <button
