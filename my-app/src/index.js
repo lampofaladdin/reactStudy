@@ -58,10 +58,10 @@ class Game extends React.Component {
         super(props);
         this.state = {
             history: [
-                { squares: Array(9).fill(null) }
+                { squares: Array(9).fill(null), clicked: null }
             ],
             xIsNext: true,
-            stepNumber: 0
+            stepNumber: 0,
         }
     }
 
@@ -90,10 +90,11 @@ class Game extends React.Component {
         //stepNumber为数组的长度，保证保证步数跟数组长度一致
         this.setState({
             history: history.concat([{
-                squares: squares
+                squares: squares,
+                clicked: i
             }]),
             xIsNext: !this.state.xIsNext,
-            stepNumber: history.length
+            stepNumber: history.length,
         })
     }
 
@@ -115,9 +116,11 @@ class Game extends React.Component {
 
         //map遍历数组，返回一个虚拟DOM列表
         const moves = history.map((setp, move) => {
+            const row = Math.floor(setp.clicked / 3) + 1;
+            const col = setp.clicked % 3;
             const desc = move ?
-                "go to game at # " + move :
-                'go to game start';
+                `go to game at # ${move} point is [${row},${col}]` :
+                `go to game start`;
             return (
                 <li key={move}>
                     <button onClick={() => { this.jumpTo(move) }}>{desc}</button>
