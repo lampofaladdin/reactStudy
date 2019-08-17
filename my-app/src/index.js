@@ -19,6 +19,7 @@ class Board extends React.Component {
     //渲染squar组件 可以直接写在render里面，但是不好看
     renderSquare(i) {
         return <Square
+            key={i}
             //父组件传递一个数组过来，value为父组件squares[i]
             value={this.props.squares[i]}
             //子组件点击后会触发onTouch方法，然后触发父组件的ontouch方法，并穿参数
@@ -26,11 +27,25 @@ class Board extends React.Component {
         />;
     }
 
+    //循环渲染棋盘
+    renderBorder() {
+        let result = [];
+        for (let i = 0; i < 3; i++) {
+            let childDom = []
+            for (let j = 0; j < 3; j++) {
+                childDom.push(this.renderSquare(i * 3 + j));
+            }
+            result.push(<div key={i} className="board-row">{childDom}</div>)
+        }
+        return result;
+    }
+
     //渲染棋盘
     render() {
         return (
             <div>
-                <div className="board-row">
+                {this.renderBorder()}
+                {/* <div className="board-row">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
                     {this.renderSquare(2)}
@@ -44,7 +59,7 @@ class Board extends React.Component {
                     {this.renderSquare(6)}
                     {this.renderSquare(7)}
                     {this.renderSquare(8)}
-                </div>
+                </div> */}
             </div>
         );
     }
@@ -58,7 +73,10 @@ class Game extends React.Component {
         super(props);
         this.state = {
             history: [
-                { squares: Array(9).fill(null), clicked: null }
+                {
+                    squares: Array(9).fill(null),
+                    clicked: null,
+                }
             ],
             xIsNext: true,
             stepNumber: 0,
@@ -103,6 +121,7 @@ class Game extends React.Component {
         this.setState({
             stepNumber: step,
             xIsNext: (step % 2) === 0,
+
         });
     }
 
@@ -122,7 +141,7 @@ class Game extends React.Component {
                 `go to game at # ${move} point is [${row},${col}]` :
                 `go to game start`;
             return (
-                <li key={move}>
+                <li key={move} className={move === this.state.stepNumber ? "strong" : ""} >
                     <button onClick={() => { this.jumpTo(move) }}>{desc}</button>
                 </li>
             )
@@ -177,8 +196,4 @@ function calculateWinner(squares) {
         }
     }
     return null;
-}
-
-function showRowAndCol(squares, index) {
-
 }
