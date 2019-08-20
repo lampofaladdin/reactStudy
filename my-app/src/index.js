@@ -65,6 +65,8 @@ class Game extends React.Component {
             ],
             xIsNext: true,
             stepNumber: 0,
+            sort: true
+
         }
     }
 
@@ -98,7 +100,6 @@ class Game extends React.Component {
             }]),
             xIsNext: !this.state.xIsNext,
             stepNumber: history.length,
-            sort: true
         })
     }
 
@@ -107,7 +108,12 @@ class Game extends React.Component {
         this.setState({
             stepNumber: step,
             xIsNext: (step % 2) === 0,
+        });
+    }
 
+    sortByKey() {
+        this.setState({
+            sort: !this.state.sort
         });
     }
 
@@ -118,6 +124,7 @@ class Game extends React.Component {
 
         //当前展示的内容为stepNumber对应的内容
         const current = history[this.state.stepNumber];
+
 
         //map遍历数组，返回一个虚拟DOM列表
         const moves = history.map((setp, move) => {
@@ -132,6 +139,8 @@ class Game extends React.Component {
                 </li>
             )
         });
+
+        const sortMoves = this.state.sort ? moves.sort((a, b) => a.key - b.key) : moves.sort((a, b) => b.key - a.key);
 
         let status;
         const winner = calculateWinner(current.squares);
@@ -150,7 +159,8 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <ol>{moves}</ol>
+                    <button onClick={() => { this.sortByKey() }}>sort by {this.state.sort ? "ASC" : "DESC"} </button>
+                    <ol>{sortMoves}</ol>
                 </div>
             </div>
         );
