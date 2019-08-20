@@ -66,7 +66,6 @@ class Game extends React.Component {
             xIsNext: true,
             stepNumber: 0,
             sort: true
-
         }
     }
 
@@ -111,10 +110,17 @@ class Game extends React.Component {
         });
     }
 
+    //排序按钮点击事件
     sortByKey() {
         this.setState({
             sort: !this.state.sort
         });
+    }
+
+    //渲染排序按钮
+    renderSortButton() {
+        const sort = `sort by ${this.state.sort ? 'asc' : 'desc'} `
+        return <button onClick={() => { this.sortByKey() }}>{sort}</button>
     }
 
     render() {
@@ -124,7 +130,6 @@ class Game extends React.Component {
 
         //当前展示的内容为stepNumber对应的内容
         const current = history[this.state.stepNumber];
-
 
         //map遍历数组，返回一个虚拟DOM列表
         const moves = history.map((setp, move) => {
@@ -140,6 +145,7 @@ class Game extends React.Component {
             )
         });
 
+        //根据sort判断是否降序
         const sortMoves = this.state.sort ? moves.sort((a, b) => a.key - b.key) : moves.sort((a, b) => b.key - a.key);
 
         let status;
@@ -159,7 +165,7 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <button onClick={() => { this.sortByKey() }}>sort by {this.state.sort ? "ASC" : "DESC"} </button>
+                    <div>{this.renderSortButton()}</div>
                     <ol>{sortMoves}</ol>
                 </div>
             </div>
