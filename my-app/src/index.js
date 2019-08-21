@@ -81,11 +81,13 @@ class Game extends React.Component {
         //因为数组是地址引用，所以要创建一个新的数组
         const squares = current.squares.slice();
 
+        let winnerObj = calculateWinner(squares);
+        
         //判断游戏是否结束 如果结束，无法点击棋盘，判断是否当前点击的格子有内容，如果有，无法点击该格子
-        if (calculateWinner(squares) || squares[i]) {
+        if ((winnerObj && winnerObj.winner) || squares[i]) {
+            
             return;
         }
-
         //判断本次点击的生成的是X还是O
         squares[i] = this.state.xIsNext ? "X" : "O";
 
@@ -149,7 +151,7 @@ class Game extends React.Component {
         const sortMoves = this.state.sort ? moves.sort((a, b) => a.key - b.key) : moves.sort((a, b) => b.key - a.key);
 
         let status;
-        const winner = calculateWinner(current.squares);
+        const winner = calculateWinner(current.squares) && calculateWinner(current.squares).winner;
         if (winner) {
             status = 'Winner: ' + winner;
         } else {
@@ -194,7 +196,10 @@ function calculateWinner(squares) {
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return {
+                winner: squares[a],
+                key: [a, b, c]
+            };
         }
     }
     return null;
