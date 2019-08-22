@@ -6,7 +6,7 @@ import './index.css';
 function Square(props) {
     return (
         <button
-            className='square'
+            className={`square ${props.isStrong ? 'strong' : ''}`}
             onClick={props.onTouch}
         >
             {props.value}
@@ -22,6 +22,7 @@ class Board extends React.Component {
             key={i}
             //父组件传递一个数组过来，value为父组件squares[i]
             value={this.props.squares[i]}
+            isStrong={this.props.winnerKey && this.props.winnerKey.includes(i) ? true : false}
             //子组件点击后会触发onTouch方法，然后触发父组件的ontouch方法，并穿参数
             onTouch={() => { this.props.onTouch(i) }}
         />;
@@ -65,7 +66,8 @@ class Game extends React.Component {
             ],
             xIsNext: true,
             stepNumber: 0,
-            sort: true
+            sort: true,
+            winnerKey: null
         }
     }
 
@@ -81,13 +83,18 @@ class Game extends React.Component {
         //因为数组是地址引用，所以要创建一个新的数组
         const squares = current.squares.slice();
 
+
         let winnerObj = calculateWinner(squares);
-        
+
         //判断游戏是否结束 如果结束，无法点击棋盘，判断是否当前点击的格子有内容，如果有，无法点击该格子
-        if ((winnerObj && winnerObj.winner) || squares[i]) {
-            
+
+        if (squares[i]) {
             return;
         }
+        if (winnerObj && winnerObj.winner) {
+            return
+        }
+
         //判断本次点击的生成的是X还是O
         squares[i] = this.state.xIsNext ? "X" : "O";
 
@@ -101,7 +108,8 @@ class Game extends React.Component {
             }]),
             xIsNext: !this.state.xIsNext,
             stepNumber: history.length,
-        })
+            winner: calculateWinner(squares) && calculateWinner(squares).winnerKey
+        });
     }
 
     //跳转历史继续方法，更新stepNumber与xIsnext
@@ -162,6 +170,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
+                        winnerKey={this.state.winnerKey}
                         onTouch={(i) => { this.handleClick(i) }}
                     />
                 </div>
@@ -184,21 +193,29 @@ ReactDOM.render(
 
 function calculateWinner(squares) {
     const lines = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+        [0, 1, 2],//0
+        [3, 4, 5],//0
+        [6, 7, 8],//0
+        [2, 4, 6],//45
+        [0, 3, 6],//90
+        [1, 4, 7],//90
+        [2, 5, 8],//90
+        [0, 4, 8],//135
     ];
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            let direction = "deg0";
+            switch (i) {
+                case i < 3: direction = "deg0"; break;
+                case i < 4: direction = "deg45"; break;
+                case i < 8: direction = "deg90"; break;
+                case i < 9: direction = "deg135"; break;
+            }
             return {
                 winner: squares[a],
-                key: [a, b, c]
+                winnerKey: [a, b, c],
+                direction
             };
         }
     }

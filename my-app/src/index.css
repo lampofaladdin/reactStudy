@@ -31,6 +31,8 @@ ul {
   padding: 0;
   text-align: center;
   width: 34px;
+  position: relative;
+  overflow: hidden;
 }
 
 .square:focus {
@@ -53,4 +55,50 @@ ul {
 
 .strong button {
   font-weight: bold;
+}
+
+
+
+.deg0::after {
+  content: "";
+  position: absolute;
+  background: #000;
+  width: 200%;
+  height: 1px;
+  left: -100%;
+  margin-left: 50%;
+  transform: rotate(45deg)
+}
+
+.deg45::after {
+  content: "";
+  position: absolute;
+  background: #000;
+  width: 200%;
+  height: 1px;
+  left: -100%;
+  margin-left: 50%;
+  transform: rotate(45deg)
+}
+
+.deg90::after {
+  content: "";
+  position: absolute;
+  background: #000;
+  width: 200%;
+  height: 1px;
+  left: -100%;
+  margin-left: 50%;
+  transform: rotate(90deg)
+}
+
+.deg135::after {
+  content: "";
+  position: absolute;
+  background: #000;
+  width: 200%;
+  height: 1px;
+  left: -100%;
+  margin-left: 50%;
+  transform: rotate(45deg)
 }
