@@ -6,7 +6,7 @@ import './index.css';
 function Square(props) {
     return (
         <button
-            className={`square ${props.isStrong ? 'strong' : ''}`}
+            className={`square ${props.btnClassName}`}
             onClick={props.onTouch}
         >
             {props.value}
@@ -18,11 +18,16 @@ class Board extends React.Component {
 
     //渲染squar组件 可以直接写在render里面，但是不好看
     renderSquare(i) {
+        //获取到父组件传来的winner对象
+        const winner = this.props.winner;
+        // 得到winner对象对应的方向
+        let btnClassName = winner && winner.name && winner.key.includes(i) ? winner.direction : '';
         return <Square
             key={i}
             //父组件传递一个数组过来，value为父组件squares[i]
             value={this.props.squares[i]}
-            isStrong={this.props.winnerKey && this.props.winnerKey.includes(i) ? true : false}
+            //传给子组件class名
+            btnClassName={btnClassName}
             //子组件点击后会触发onTouch方法，然后触发父组件的ontouch方法，并穿参数
             onTouch={() => { this.props.onTouch(i) }}
         />;
@@ -30,6 +35,7 @@ class Board extends React.Component {
 
     //循环渲染棋盘
     renderBorder() {
+        //循环键盘对象
         let result = [];
         for (let i = 0; i < 3; i++) {
             let childDom = []
@@ -54,7 +60,7 @@ class Board extends React.Component {
 //最终渲染
 class Game extends React.Component {
 
-    //hisotry为历史记录，XisNext是下一步是X还是O，stepNmumber用来存放历史记录
+    //hisotry为历史记录，XisNext是下一步是X还是O，stepNmumber用来存放历史记录,sort表示正序还是倒序，winner表示哪个赢了，赢
     constructor(props) {
         super(props);
         this.state = {
@@ -67,7 +73,11 @@ class Game extends React.Component {
             xIsNext: true,
             stepNumber: 0,
             sort: true,
-            winnerKey: null
+            winner: {
+                name: null,
+                key: null,
+                direction: null
+            }
         }
     }
 
@@ -83,15 +93,13 @@ class Game extends React.Component {
         //因为数组是地址引用，所以要创建一个新的数组
         const squares = current.squares.slice();
 
-
-        let winnerObj = calculateWinner(squares);
-
+        //获取到内容
+        let winner = calculateWinner(squares);
         //判断游戏是否结束 如果结束，无法点击棋盘，判断是否当前点击的格子有内容，如果有，无法点击该格子
-
         if (squares[i]) {
             return;
         }
-        if (winnerObj && winnerObj.winner) {
+        if (winner && winner.name) {
             return
         }
 
@@ -108,15 +116,21 @@ class Game extends React.Component {
             }]),
             xIsNext: !this.state.xIsNext,
             stepNumber: history.length,
-            winner: calculateWinner(squares) && calculateWinner(squares).winnerKey
+            winner: calculateWinner(squares)
         });
     }
 
     //跳转历史继续方法，更新stepNumber与xIsnext
+    //需要先更新stepNumber，然后再根据stepNumber找到正确的历史记录，并更新winner
     jumpTo(step) {
         this.setState({
             stepNumber: step,
             xIsNext: (step % 2) === 0,
+        }, () => {
+            const squares = this.state.history[this.state.stepNumber];
+            this.setState({
+                winner: calculateWinner(squares.squares)
+            })
         });
     }
 
@@ -159,9 +173,10 @@ class Game extends React.Component {
         const sortMoves = this.state.sort ? moves.sort((a, b) => a.key - b.key) : moves.sort((a, b) => b.key - a.key);
 
         let status;
-        const winner = calculateWinner(current.squares) && calculateWinner(current.squares).winner;
-        if (winner) {
-            status = 'Winner: ' + winner;
+        const winner = calculateWinner(current.squares);
+
+        if (winner && winner.name) {
+            status = 'Winner: ' + winner.name;
         } else {
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
@@ -170,7 +185,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        winnerKey={this.state.winnerKey}
+                        winner={this.state.winner}
                         onTouch={(i) => { this.handleClick(i) }}
                     />
                 </div>
@@ -196,25 +211,25 @@ function calculateWinner(squares) {
         [0, 1, 2],//0
         [3, 4, 5],//0
         [6, 7, 8],//0
-        [2, 4, 6],//45
+        [0, 4, 8],//45
         [0, 3, 6],//90
         [1, 4, 7],//90
         [2, 5, 8],//90
-        [0, 4, 8],//135
+        [2, 4, 6],//135
     ];
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
             let direction = "deg0";
-            switch (i) {
+            switch (true) {
                 case i < 3: direction = "deg0"; break;
                 case i < 4: direction = "deg45"; break;
-                case i < 8: direction = "deg90"; break;
-                case i < 9: direction = "deg135"; break;
+                case i < 7: direction = "deg90"; break;
+                default: direction = "deg135"; break;
             }
             return {
-                winner: squares[a],
-                winnerKey: [a, b, c],
+                name: squares[a],
+                key: [a, b, c],
                 direction
             };
         }
