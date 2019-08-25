@@ -177,6 +177,8 @@ class Game extends React.Component {
 
         if (winner && winner.name) {
             status = 'Winner: ' + winner.name;
+        } else if (history.length === 10) {
+            status = "Draw game";
         } else {
             status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
         }
